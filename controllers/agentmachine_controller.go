@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-openapi/swag"
 	aiv1beta1 "github.com/openshift/assisted-service/api/v1beta1"
+	logutil "github.com/openshift/assisted-service/pkg/log"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -52,8 +53,9 @@ type AgentMachineReconciler struct {
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters,verbs=get;list;watch
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=machines,verbs=get;list;watch
 
-func (r *AgentMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := r.Log.WithFields(
+func (r *AgentMachineReconciler) Reconcile(originalCtx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	ctx := addRequestIdIfNeeded(originalCtx)
+	log := logutil.FromContext(ctx, r.Log).WithFields(
 		logrus.Fields{
 			"agent_machine":           req.Name,
 			"agent_machine_namespace": req.Namespace,
@@ -94,7 +96,7 @@ func (r *AgentMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	// If the AgentMachine has an agent, check its conditions and update ready/error
-	return r.updateAgentStatus(ctx, log, agentMachine)
+	return r.updateAgentStatus(ctx, log, agentMachine, agent)
 }
 
 func (r *AgentMachineReconciler) findAgent(ctx context.Context, log logrus.FieldLogger, agentMachine *capiproviderv1alpha1.AgentMachine) (ctrl.Result, error) {
@@ -219,15 +221,12 @@ func (r *AgentMachineReconciler) getClusterDeploymentFromAgentMachine(ctx contex
 	return &agentCluster.Status.ClusterDeploymentRef, nil
 }
 
-func (r *AgentMachineReconciler) updateAgentStatus(ctx context.Context, log logrus.FieldLogger, agentMachine *capiproviderv1alpha1.AgentMachine) (ctrl.Result, error) {
-	agent := &aiv1beta1.Agent{}
-	if err := r.Get(ctx, types.NamespacedName{Namespace: agentMachine.Status.AgentRef.Namespace, Name: agentMachine.Status.AgentRef.Name}, agent); err != nil {
-		return ctrl.Result{RequeueAfter: defaultRequeueAfterOnError}, err
-	}
-
+func (r *AgentMachineReconciler) updateAgentStatus(ctx context.Context, log logrus.FieldLogger, agentMachine *capiproviderv1alpha1.AgentMachine, agent *aiv1beta1.Agent) (ctrl.Result, error) {
+	log.Info("Updating agentMachine status")
 	for _, condition := range agent.Status.Conditions {
 		if condition.Type == aiv1beta1.InstalledCondition {
 			if condition.Status == "True" {
+				log.Info("Updating agentMachine status to Ready=true")
 				agentMachine.Status.Ready = true
 			} else if condition.Status == "False" {
 				if condition.Reason == aiv1beta1.InstallationFailedReason {
@@ -235,6 +234,7 @@ func (r *AgentMachineReconciler) updateAgentStatus(ctx context.Context, log logr
 					agentMachine.Status.FailureMessage = &condition.Message
 				}
 			}
+			break
 		}
 	}
 
