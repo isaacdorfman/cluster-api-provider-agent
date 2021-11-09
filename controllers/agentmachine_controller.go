@@ -52,7 +52,6 @@ type AgentMachineReconciler struct {
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=machines,verbs=get;list;watch
 
 func (r *AgentMachineReconciler) Reconcile(originalCtx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	ctx := addRequestIdIfNeeded(originalCtx)
 	log := r.Log.WithFields(
 		logrus.Fields{
 			"agent_machine":           req.Name,

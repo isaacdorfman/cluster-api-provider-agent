@@ -47,7 +47,6 @@ type AgentClusterReconciler struct {
 //+kubebuilder:rbac:groups=extensions.hive.openshift.io,resources=agentclusterinstalls,verbs=get;list;watch;create;update;patch;delete
 
 func (r *AgentClusterReconciler) Reconcile(originalCtx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	ctx := addRequestIdIfNeeded(originalCtx)
 	log := r.Log.WithFields(
 		logrus.Fields{
 			"agent_cluster":           req.Name,
