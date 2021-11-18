@@ -94,7 +94,7 @@ func (r *AgentMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	// then set it. At this point we might find that the Agent is already bound and we'll need
 	// to find a new one.
 	if agent.Spec.ClusterDeploymentName == nil {
-		return r.setAgentClusterDeploymentRef(ctx, log, agentMachine, agent)
+		return r.updateAgentSpec(ctx, log, agentMachine, agent)
 	}
 
 	// If the AgentMachine has an agent, check its conditions and update ready/error
@@ -155,7 +155,7 @@ func (r *AgentMachineReconciler) findAgent(ctx context.Context, log logrus.Field
 	}
 
 	// Make a best-effort try to update the Agent->ClusterDeployment ref, if it doesn't work we'll try in the next reconcile
-	return r.setAgentClusterDeploymentRef(ctx, log, agentMachine, foundAgent)
+	return r.updateAgentSpec(ctx, log, agentMachine, foundAgent)
 }
 
 func (r *AgentMachineReconciler) setIgnitionEndpointToken(ctx context.Context, log logrus.FieldLogger, agent *aiv1beta1.Agent, agentMachine *capiproviderv1alpha1.AgentMachine) error {
@@ -239,7 +239,9 @@ func isValidAgent(agent *aiv1beta1.Agent, agentMachines *capiproviderv1alpha1.Ag
 	return true
 }
 
-func (r *AgentMachineReconciler) setAgentClusterDeploymentRef(ctx context.Context, log logrus.FieldLogger, agentMachine *capiproviderv1alpha1.AgentMachine, agent *aiv1beta1.Agent) (ctrl.Result, error) {
+func (r *AgentMachineReconciler) updateAgentSpec(ctx context.Context, log logrus.FieldLogger, agentMachine *capiproviderv1alpha1.AgentMachine, agent *aiv1beta1.Agent) (ctrl.Result, error) {
+	agent.Spec.MachineConfigPool = agentMachine.Spec.MachineConfigPool
+
 	clusterDeploymentRef, err := r.getClusterDeploymentFromAgentMachine(ctx, log, agentMachine)
 	if err != nil {
 		log.WithError(err).Error("Failed to find ClusterDeploymentRef")

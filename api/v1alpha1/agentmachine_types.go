@@ -22,19 +22,23 @@ import (
 	"sigs.k8s.io/cluster-api/errors"
 )
 
-// AgentMachineSpec defines the desired state of AgentMachine
+// AgentMachineSpec defines the desired state of AgentMachine.
 type AgentMachineSpec struct {
-	// The minimum number of CPU cores that this Machine requires
+	// MinCPUs is the minimum number of CPU cores that this Machine requires.
 	// +optional
 	MinCPUs int32 `json:"minCPUs,omitempty"`
 
-	// The minimum amount of RAM that this Machine requires, in MiB
+	// MinMemoryMiB is the minimum amount of RAM that this Machine requires, in MiB.
 	// +optional
 	MinMemoryMiB int32 `json:"minMemoryMiB,omitempty"`
 
-	// The labels that must be set on an Agent in order to be selected for this Machine
+	// AgentLabelSelector contains the labels that must be set on an Agent to be
+	// selected for this Machine.
 	// +optional
 	AgentLabelSelector metav1.LabelSelector `json:"agentLabelSelector,omitempty"`
+
+	// MachineConfigPool is the MCP that should be specified on the Agent.
+	MachineConfigPool string `json:"machineConfigPool,omitempty"`
 
 	// ProviderID is the host's motherboard serial formatted as
 	// agent://12345678-1234-1234-1234-123456789abc
@@ -47,7 +51,7 @@ type AgentMachineStatus struct {
 	// +optional
 	Ready bool `json:"ready"`
 
-	// The Agent matched to the Machine
+	// AgentRef references the Agent matched to the Machine.
 	AgentRef *AgentReference `json:"agentRef,omitempty"`
 
 	// Addresses contains the Agent's associated addresses.
