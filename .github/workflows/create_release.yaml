@@ -37,7 +37,7 @@ jobs:
           asset_name: infrastructure-components.yaml
           asset_content_type: text/plain
       - name: Upload metadata.yaml
-        id: upload-infrastructure-components 
+        id: upload-metadata 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
