@@ -36,7 +36,7 @@ IMAGE_TAG_BASE ?= agent-install.openshift.io/cluster-api-provider-agent
 BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= quay.io/eranco74/cluster-api-provider-agent@sha256:36285266c563f9421f8b536b99aa69408bf4b828ef5d25479d52089e36d07c31
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
@@ -106,7 +106,10 @@ docker-push: ## Push docker image with the manager.
 
 ##@ Deployment
 
-create_infrastructure-components: manifests kustomize
+set_controller_image:
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+
+create_infrastructure-components: manifests kustomize set_controller_image
 	$(KUSTOMIZE) build config/default > infrastructure-components.yaml
 
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
@@ -115,8 +118,7 @@ install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~
 uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
-deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+deploy: manifests kustomize set_controller_image ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
