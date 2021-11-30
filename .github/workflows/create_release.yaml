@@ -8,7 +8,7 @@ on:
       - 'release-*'
       - 'master'
 
-name: Upload Release Asset
+name: Build push and release
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-      - uses: ./.github/actions/build_and_push.yaml
+      - uses: ./.github/actions/build_and_push
         with:
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_ROBOT_TOKEN: ${{ secrets.QUAY_ROBOT_TOKEN }}

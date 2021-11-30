@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: ./.github/actions/build_and_push.yaml
+    - uses: ./.github/actions/build_and_push
       with:
         QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
         QUAY_ROBOT_TOKEN: ${{ secrets.QUAY_ROBOT_TOKEN }}
