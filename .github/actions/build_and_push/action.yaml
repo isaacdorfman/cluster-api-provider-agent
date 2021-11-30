@@ -29,8 +29,8 @@ runs:
         QUAY_TAG_EXPIRATION: 1w
       with:
         name: cluster-api-provider-agent
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+        username: ${{ inputs.QUAY_USERNAME }}
+        password: ${{ inputs.QUAY_ROBOT_TOKEN }}
         REGISTRY: 'quay.io/eranco74'
         buildargs: QUAY_TAG_EXPIRATION
         dockerfile: Dockerfile
@@ -41,8 +41,8 @@ runs:
       uses: elgohr/Publish-Docker-Github-Action@2.15
       with:
         name: cluster-api-provider-agent
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+        username: ${{ inputs.QUAY_USERNAME }}
+        password: ${{ inputs.QUAY_ROBOT_TOKEN }}
         REGISTRY: 'quay.io/eranco74'
         dockerfile: Dockerfile
         tags: "latest,${{ steps.vars.outputs.sha_short }}"
