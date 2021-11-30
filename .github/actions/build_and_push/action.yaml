@@ -1,4 +1,5 @@
 name: "Build and Push"
+description: 'Build image and push to quay'
 inputs:
   QUAY_USERNAME:
     required: true
