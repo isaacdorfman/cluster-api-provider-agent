@@ -1,8 +1,12 @@
 on:
   push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    branches:
+    - 'release-*'
+    - 'master'
+  pull_request:
+    branches:
+      - 'release-*'
+      - 'master'
 
 name: Upload Release Asset
 
@@ -12,21 +16,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/checkout@v1
+      - uses: ./.github/actions/build_and_push.yaml
         with:
-          go-version: '1.16.6'
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_ROBOT_TOKEN: ${{ secrets.QUAY_ROBOT_TOKEN }}
       - name: Create infrastructure components
         run: |
           make create_infrastructure-components
+      - uses: jungwinter/split@v2
+        id: split
+        with:
+          msg: ${{ github.ref }}
+          separator: "release-"
+      - name: Get tag name
+        id: vars
+        env:
+          OUT: ${{github.ref=='master' && 'master' || steps.split.outputs._1}}
+        run: echo "::set-output name=tag_name::$OUT"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: "${{ steps.vars.outputs.tag_name }}"
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
