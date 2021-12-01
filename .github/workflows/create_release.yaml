@@ -40,6 +40,7 @@ jobs:
         env:
           OUT: ${{ steps.split.outputs._1 }}
         if: ${{ github.ref!='master' }}
+        run: echo "::set-output name=tag_name::$(echo $OUT)"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
