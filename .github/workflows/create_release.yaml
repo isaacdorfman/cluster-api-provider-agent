@@ -32,14 +32,7 @@ jobs:
       - name: Get tag name
         id: vars
         env:
-          OUT: ${{'latest'}}
-        if: ${{ github.ref=='master' }}
-        run: echo "::set-output name=tag_name::$(echo $OUT)"
-      - name: Get tag name
-        id: vars
-        env:
-          OUT: ${{ steps.split.outputs._1 }}
-        if: ${{ github.ref!='master' }}
+          OUT: ${{ github.ref == 'master' && 'latest' || steps.split.outputs._1 }}
         run: echo "::set-output name=tag_name::$(echo $OUT)"
       - name: Create Release
         id: create_release
