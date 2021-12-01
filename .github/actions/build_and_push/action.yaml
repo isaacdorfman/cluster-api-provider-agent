@@ -2,8 +2,10 @@ name: "Build and Push"
 description: 'Build image and push to quay'
 inputs:
   QUAY_USERNAME:
+    description: "The username to quay"
     required: true
   QUAY_ROBOT_TOKEN:
+    description: "The token to quay"
     required: true
 
 runs:
