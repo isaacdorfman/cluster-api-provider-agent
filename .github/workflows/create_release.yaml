@@ -33,7 +33,9 @@ jobs:
         id: vars
         env:
           OUT: ${{ github.ref == 'master' && 'latest' || steps.split.outputs._1 }}
-        run: echo "::set-output name=tag_name::$(echo $OUT)"
+          REF: ${{ github.ref }}
+        run: |
+         echo "::set-output name=tag_name::$(echo $REF)"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
