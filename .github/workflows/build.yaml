@@ -27,7 +27,7 @@ jobs:
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - name: Publish image to registry
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        uses: elgohr/Publish-Docker-Github-Action@2.15
+        uses: elgohr/Publish-Docker-Github-Action@v5
         env:
           QUAY_TAG_EXPIRATION: 1w
         with:
@@ -41,7 +41,7 @@ jobs:
       - name: Publish image to registry
         # Publish the image with latest tag only in case of push to master
         if: github.event_name != 'pull_request'
-        uses: elgohr/Publish-Docker-Github-Action@2.15
+        uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: cluster-api-provider-agent
           username: ${{ secrets.QUAY_USERNAME }}
